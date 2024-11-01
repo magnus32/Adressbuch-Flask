@@ -1,0 +1,76 @@
+{% extends "base.html" %}
+
+{% block content %}
+  <h1>Adressbuch</h1>
+  <table class="table table-striped">
+    <thead>
+      <tr>
+        <th><a href="{{ url_for('main.index', sort='id', direction='asc' if sort != 'id' or direction == 'desc' else 'desc', search=search) }}">ID</a></th>
+        <th><a href="{{ url_for('main.index', sort='name', direction='asc' if sort != 'name' or direction == 'desc' else 'desc', search=search) }}">Name</a></th>
+        <th><a href="{{ url_for('main.index', sort='phone', direction='asc' if sort != 'phone' or direction == 'desc' else 'desc', search=search) }}">Telefon</a></th>
+        <th><a href="{{ url_for('main.index', sort='email', direction='asc' if sort != 'email' or direction == 'desc' else 'desc', search=search) }}">E-Mail</a></th>
+        <th><a href="{{ url_for('main.index', sort='address', direction='asc' if sort != 'address' or direction == 'desc' else 'desc', search=search) }}">Adresse</a></th>
+        <th><a href="{{ url_for('main.index', sort='date', direction='asc' if sort != 'date' or direction == 'desc' else 'desc', search=search) }}">Datum</a></th>
+        <th>Aktionen</th>
+      </tr>
+    </thead>
+    <tbody>
+      {% for contact in contacts %}
+        <tr>
+          <td>{{ contact.id }}</td>
+          <td>{{ contact.name }}</td>
+          <td>{{ contact.phone }}</td>
+          <td>{{ contact.email }}</td>
+          <td>{{ contact.address }}</td>
+          <td>{{ contact.date.strftime('%d.%m.%Y %H:%M:%S') }}</td>
+          <td>
+            <a href="{{ url_for('main.edit_contact', id=contact.id, sort=sort, direction=direction, search=search, page=page) }}" class="btn btn-warning btn-sm"><i class="fas fa-edit"></i></a>
+            <button type="button" class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal" data-id="{{ contact.id }}" data-url="{{ url_for('main.delete_contact', id=contact.id, sort=sort, direction=direction, search=search, page=page) }}">
+              <i class="fas fa-trash"></i>
+            </button>
+          </td>
+        </tr>
+      {% endfor %}
+    </tbody>
+  </table>
+  <nav class="d-flex justify-content-between align-items-center">
+    <div>
+      {{ pagination.links }}
+    </div>
+    <div>
+      <span class="badge bg-secondary">Gefundene Einträge: {{ total }}</span>
+    </div>
+  </nav>
+
+  <!-- Delete Confirmation Modal -->
+  <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h5 class="modal-title" id="deleteModalLabel">Eintrag löschen</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          Wollen Sie diesen Eintrag wirklich löschen?
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Abbrechen</button>
+          <form id="deleteForm" method="post" style="display:inline;">
+            <button type="submit" class="btn btn-danger">Löschen</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    var deleteModal = document.getElementById('deleteModal')
+    deleteModal.addEventListener('show.bs.modal', function (event) {
+      var button = event.relatedTarget
+      var id = button.getAttribute('data-id')
+      var url = button.getAttribute('data-url')
+      var form = deleteModal.querySelector('#deleteForm')
+      form.action = url
+    })
+  </script>
+{% endblock %}
